@@ -13,7 +13,7 @@ class LoginController extends Controller
     public function login(Request $request)
     {
         $request->validate([
-            'phone' => 'required','regex:/^([0-9\s\-\+\(\)]*)$/',
+            'phone' => 'required', 'regex:/^([0-9\s\-\+\(\)]*)$/',
             'password' => 'required',
         ]);
 
@@ -22,16 +22,23 @@ class LoginController extends Controller
         if (!$user || !Hash::check($request->password, $user->password)) {
             throw ValidationException::withMessages([
                 'email' => ['The provided credentials are incorrect.'],
-            ]);
+            ], 401);
         }
 
-        return $user->createToken($request->phone)->plainTextToken;
+        return response()->json([
+            "status" => true,
+            'msg' => 'Logged in successfully',
+            "token" => $user->createToken($request->phone)->plainTextToken
+        ], 200);
     }
 
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();
 
-        return response()->json(['msg' => 'Logged out successfully']);
+        return response()->json([
+            'status' => true,
+            'msg' => 'Logged out successfully'
+        ], 200);
     }
 }
